@@ -56,7 +56,7 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Select the package with the script
 	Script Name: OSD_Wizard_Generic.Export.ps1
 	
-	NOTE: Parameters must be set to "True" or not set. Any other option will cause parameter a validation error
+NOTE: Parameters must be set to "True" or not set. Any other option will cause parameter a validation error
 	Parameters:
 	-CustomWizardTitle 'CustomWizardTitle'
 	-DisableComputerName True
@@ -72,7 +72,7 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Files
 	OSD_Wizard.log - OSD wizard selection output log
 	
-	Task sequence variables that are set
+Task sequence variables that are set
 	OSDComputerName
 	OSDDomainName - Only returned if enabled
 	OSDDomainOUName - Only returned if enabled
@@ -96,18 +96,18 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 .FUNCTIONALITY
 	OSD wizard will only function in Windows PE
 	
-	Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
-	OSD_Wizard.Log logs the wizard output
+Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
+OSD_Wizard.Log logs the wizard output
 	
-	Wizard functionality and configurations
+Wizard functionality and configurations
 	Custom wizard Icon
 	Include a ".ico" file in the script folder
 	
-	Custom wizard header/banner
+Custom wizard header/banner
 	Include a ".bmp" file with the dimensions 759 x 69
 	NOTE: These are the same dimensions as the UDI wizard banner
 	
-	OU Selection dropdown list
+OU Selection dropdown list
 	Is disabled by default
 	To populate the OU selection list
 	In the script folder, include a CSV file named "OSDADOUList.csv" with a "Name" and "DistinguishedName" column
@@ -116,7 +116,7 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Sales Dept Workstations		OU=Workstations,OU=SalesDept,DC=Contoso,DC=Local
 	NW Marketing Desktops		OU=Desktops,OU=Marketing,OU=NorthWestRegion,DC=Contoso,DC=Local
 	
-	OS Image selection dropdown list
+OS Image selection dropdown list
 	Is disable by default
 	To populate the OS Images list, include a CSV file named "OSDOSImages.csv" with a "DisplayName" and "ImageName" column.
 	When using multiple images, "ImageName" must match the logic for the "Apply Operating System Image" step matching the image name in the logic
@@ -125,7 +125,7 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
-	Applicaitons selection tab
+Applicaitons selection tab
 	Is disabled by default
 	To populate the Application selection list
 	In the script folder, include a CSV file named "OSDApplications.csv" with the columns "DisplayName", "ApplicationName", "Required", and "Checked" columns
@@ -139,19 +139,19 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Microsoft Office 365	OSD - Microsoft Office 365	TRUE
 	Mozilla Firefox			OSD - Firefox							TRUE
 	
-	Task Sequence functionality and Configurations
+Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
 	Set parameters as desired
 	Wizard sets default task sequnce variable OSDWizardSuccess equals "False"
 	OSDWizardSuccess is only set to "True" upon successfully completing the Wizard and clicking Finish
 	
-	Format and Partition Disk task sequence step
+Format and Partition Disk task sequence step
 	Variable name to store disk number should be set to "OSDDiskIndex"
 	
-	Enable BitLocker task sequence step
+Enable BitLocker task sequence step
 	Task sequence variable "OSDBitLockerMode" must be set to "True" or "False" in the Enable BitLocker task sequence step logic. (Default step logic is OSDBitLockerMode exists)
 	e.g. TaskSequenceVariable "OSDBitLockerMode" equals "True" to run Enable BitLocker step
 	NOTE: OSD wizard does not set Enable BitLocker step sub-settings such as where to escrow the recovery key
 	
-	Task sequence step "Cancelled Wizard Group" logic
+Task sequence step "Cancelled Wizard Group" logic
 	TaskSequenceVariable OSDWizardSuccess equals "False"
