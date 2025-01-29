@@ -125,7 +125,6 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
-	
 	Applicaitons selection tab
 	Is disabled by default
 	To populate the Application selection list
@@ -152,6 +151,7 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Enable BitLocker task sequence step
 	Task sequence variable "OSDBitLockerMode" must be set to "True" or "False" in the Enable BitLocker task sequence step logic. (Default step logic is OSDBitLockerMode exists)
 	e.g. TaskSequenceVariable "OSDBitLockerMode" equals "True" to run Enable BitLocker step
+	NOTE: OSD wizard does not set Enable BitLocker step sub-settings such as where to escrow the recovery key
 	
 	Task sequence step "Cancelled Wizard Group" logic
 	TaskSequenceVariable OSDWizardSuccess equals "False"
