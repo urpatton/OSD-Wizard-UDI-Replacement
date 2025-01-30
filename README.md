@@ -11,58 +11,80 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Sets a custom title for the OSD Wizard
 
 .PARAMETER DisableComputerName
-	Disable the computername text box
-	NOTE: Computer name field is still required by default. Use "-SerializeName" and/with "-NamePrefix" to ensure field is populated.
-	You may also use -DisableComputerNameRequirement parameter
+	Locks the computername text box.
+	Computer name field will still populate with OSDComputerName or _SMSTSMachineName unless -DisableComputerNameRequirement is used
+	NOTE: Computer name field is required by default. If OSDComputerName is not present _SMSTSMachineName is used
+	Use "-SerializeName" and/with "-NamePrefix" to ensure field is populated. Or you may also use -DisableComputerNameRequirement parameter
+	Accepted values: "True"
 
 .PARAMETER DisableComputerNameRequirement
 	Disables the requirement to enter text into the ComputerName textbox
+	NOTE: This will prevent the computer name text box from populating
+	Accepted values: "True"
 
 .PARAMETER SerializeName
 	Will compress and truncate all but the last 15 characters of the serial number.
 	When used with "-NamePrefix", will truncate serial number so name is 15 characters
 	NOTE: NamePrefix must be shorter than serial
+	Accepted values: "True"
 
 .PARAMETER NamePrefix
 	OPTIONAL. Sets the name prefix when using SerializeName. Can only be used with -SerializeName
 	Example: NamePrefix = "DeptA-" then Computer name will be "DeptA-SerialNumber"
 	NOTE: NamePrefix must be shorter than serial
+	Accepted values: Any String
 
 .PARAMETER DomainName
-	Sets the "OSDDomainName" domain name.
-	If not set the Domain Name text box will be disabled
+	Sets the "OSDDomainName" variable.
+	If set the Domain Name text box will be locked and field populated
+	Accepted values: Any String
+
+.PARAMETER DisableDomainName
+	Disables the domain name text box without setting -DomainName
+	Accepted values: "True"
 
 .PARAMETER DisableUserName
 	Disable username text box.
 	Leave enable to set "OSDJoinAccount" variable.
 	NOTE: If 'DisablePassword" is set this will set "OSDBuildaccount" in place of "OSDJoinAccount". This is to allow a separate OSD join account
+	Accepted values: "True"
 
 .PARAMETER DisablePassword
 	Disable password text box
 	Will set "OSDBuildaccount" in place of "OSDJoinAccount". This is to allow a separate OSD join account
+	Accepted values: "True"
 	Leave enabled to set "OSDJoinPassword" variable
 
+.PARAMETER DisableDiskSelection
+	Disable the disk selection drop down
+	Accepted values: "True"
+
 .PARAMETER DisableBitlocker
+	Disables the BitLocker checkbox
 	BitLocker is checked by default.
 	Uncheck BitLocker enabled checkbox.
 	Leave enabled to set "OSDBitlockerMode" = "True" or "OSDBitlockerMode" = "True"
+	Accepted values: "True"
 
 .PARAMETER DisablePreflight
 	Disable preflight checks page
 	NOTE: TPM check is automatically disabled if "OSDImageName" is like *Win*10* or Win32_TPM SpecVersion is missing from WMI
+	Accepted values: "True"
 
 .EXAMPLE
 	Task sequence step as "Run PowerShell Script" with execution policy in Bypass
 	Select the package with the script
 	Script Name: OSD_Wizard_Generic.Export.ps1
 	
-NOTE: Parameters must be set to "True" or not set. Any other option will cause parameter a validation error
+-	NOTE: Parameters must be set to "True" or not set. Any other option will cause parameter a validation error
 	Parameters:
 	-CustomWizardTitle 'CustomWizardTitle'
 	-DisableComputerName True
+	-DisableComputerNameRequirement True
 	-SerializeName True
 	-NamePrefix 'NamePrefix'
 	-DomainName 'DomainName'
+	-DisableDomainName True
 	-DisableUserName True
 	-DisablePassword True
 	-DisableBitlocker True
@@ -74,12 +96,12 @@ NOTE: Parameters must be set to "True" or not set. Any other option will cause p
 	
 Task sequence variables that are set
 	OSDComputerName
-	OSDDomainName - Only returned if enabled
-	OSDDomainOUName - Only returned if enabled
-	OSDJoinAccount - Only returned if enabled
-	OSDJoinPassword - Only returned if enabled
+	OSDDomainName 
+	OSDDomainOUName
+	OSDJoinAccount
+	OSDJoinPassword
 	OSDBuildAccount - Only returned if enabled and "-DisablePassword" selected
-	OSDImageName - Only returned if enabled
+	OSDImageName
 	OSDDiskIndex
 	OSDBitLockerMode - Always returns "True" or "False"
 	CoalescedApps - Only returned if applications enabled
@@ -95,9 +117,10 @@ Task sequence variables that are set
 
 .FUNCTIONALITY
 	OSD wizard will only function in Windows PE
-	
-Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
-OSD_Wizard.Log logs the wizard output
+
+ Logging
+	Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
+	OSD_Wizard.Log logs the wizard output
 	
 Wizard functionality and configurations
 	Custom wizard Icon
@@ -112,7 +135,7 @@ OU Selection dropdown list
 	To populate the OU selection list
 	In the script folder, include a CSV file named "OSDADOUList.csv" with a "Name" and "DistinguishedName" column
 	Example:
-	Name						DistinguishedName
+	Name				DistinguishedName
 	Sales Dept Workstations		OU=Workstations,OU=SalesDept,DC=Contoso,DC=Local
 	NW Marketing Desktops		OU=Desktops,OU=Marketing,OU=NorthWestRegion,DC=Contoso,DC=Local
 	
@@ -121,7 +144,7 @@ OS Image selection dropdown list
 	To populate the OS Images list, include a CSV file named "OSDOSImages.csv" with a "DisplayName" and "ImageName" column.
 	When using multiple images, "ImageName" must match the logic for the "Apply Operating System Image" step matching the image name in the logic
 	Example:
-	DisplayName						ImageName
+	DisplayName				ImageName
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
@@ -134,10 +157,10 @@ Applicaitons selection tab
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
 	Example:
-	DisplayName				ApplicationName				Required	Checked
-	Google Chrome			OSD - Chrome							TRUE
-	Microsoft Office 365	OSD - Microsoft Office 365	TRUE
-	Mozilla Firefox			OSD - Firefox							TRUE
+	DisplayName			ApplicationName			Required	Checked
+	Google Chrome			OSD - Chrome					TRUE
+	Microsoft Office 365		OSD - Microsoft Office 365	TRUE
+	Mozilla Firefox			OSD - Firefox					TRUE
 	
 Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
