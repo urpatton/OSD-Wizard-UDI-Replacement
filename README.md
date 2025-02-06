@@ -9,6 +9,8 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 
 .PARAMETER CustomWizardTitle
 	Sets a custom title for the OSD Wizard
+	Use "_SMSTSPackageName" to set the wizard name to the name of the OSD Task Sequence
+	Use "_SMSTSOrgName" to set the wizard name to the SCCM Org name
 
 .PARAMETER DisableComputerName
 	Locks the computername text box.
@@ -63,12 +65,28 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Disables the BitLocker checkbox
 	BitLocker is checked by default.
 	Uncheck BitLocker enabled checkbox.
-	Leave enabled to set "OSDBitlockerMode" = "True" or "OSDBitlockerMode" = "True"
+	Leave enabled to set "OSDBitlockerMode" = "True"
 	Accepted values: "True"
 
-.PARAMETER DisablePreflight
-	Disable preflight checks page
+.PARAMETER DisableTabComputerName
+	Completely disable the Computer Name tab page and requirements
+	Accepted values: "True"
+
+.PARAMETER DisableTabOperatingSystem
+	Completely disable the Operating System tab page and requirements
+	Accepted values: "True"
+
+.PARAMETER DisableTabDeploymentReadiness
+	Completely disable the Deployment Readiness preflight checks tab page
 	NOTE: TPM check is automatically disabled if "OSDImageName" is like *Win*10* or Win32_TPM SpecVersion is missing from WMI
+	Accepted values: "True"
+
+.PARAMETER DisableTabApplications
+	Completely disable the Applications tab page and requirements
+	Accepted values: "True"
+
+.PARAMETER DebugWizard
+	Disables the error return for the TS invocation.
 	Accepted values: "True"
 
 .EXAMPLE
@@ -76,8 +94,8 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	Select the package with the script
 	Script Name: OSD_Wizard_Generic.Export.ps1
 	
--	NOTE: Parameters must be set to "True" or not set. Any other option will cause parameter a validation error
-	Parameters:
+NOTE: Parameters must be set to "True" or not set. Any other option will cause parameter a validation error
+Parameters:
 	-CustomWizardTitle 'CustomWizardTitle'
 	-DisableComputerName True
 	-DisableComputerNameRequirement True
@@ -88,26 +106,31 @@ A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
 	-DisableUserName True
 	-DisablePassword True
 	-DisableBitlocker True
-	-DisablePreflight True
+	-DisableTabComputerName True
+	-DisableTabOperatingSystem True
+	-DisableTabDeploymentReadiness True
+	-DisableTabApplications True
 
 .OUTPUTS
 	Files
 	OSD_Wizard.log - OSD wizard selection output log
+	Includes device Make, Model, Serial Number, IP Address, and MAC Address information
 	
 Task sequence variables that are set
 	OSDComputerName
-	OSDDomainName 
+	OSDDomainName
 	OSDDomainOUName
 	OSDJoinAccount
 	OSDJoinPassword
 	OSDBuildAccount - Only returned if enabled and "-DisablePassword" selected
-	OSDImageName
-	OSDDiskIndex
-	OSDBitLockerMode - Always returns "True" or "False"
+	OSDImageName - Left over from UDI wizard
+	OSDDiskIndex - Physical disk number to be partitioned. Previous MDT/UDI variable was "OSDTargetDrive"
+	OSDBitLockerMode - Always returns "True" or "False". Left over from UDI wizard
 	CoalescedApps - Only returned if applications enabled
-	Make - Device Manufacturer
-	Model - Device Model
-	OSDWizardSuccess - Returns "False" by default. Returns "True" only upon wizard success
+	Make - Device Manufacturer. Added to compensate for missing BDD.log
+	Model - Device Model. Added to compensate for missing BDD.log
+	SerialNumber - Device serial number. Added to compensate for missing BDD.log
+	OSDWizardSuccess - Returns "False" by default. Returns "True" only upon wizard success. Previous MDT/UDI variable was "OSDSetupWizCancelled"
 
 .NOTES
 	Created  based on functionality of the MDT UDI wizard
@@ -117,8 +140,8 @@ Task sequence variables that are set
 
 .FUNCTIONALITY
 	OSD wizard will only function in Windows PE
-
- Logging
+	
+Logging
 	Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
 	OSD_Wizard.Log logs the wizard output
 	
@@ -135,7 +158,7 @@ OU Selection dropdown list
 	To populate the OU selection list
 	In the script folder, include a CSV file named "OSDADOUList.csv" with a "Name" and "DistinguishedName" column
 	Example:
-	Name				DistinguishedName
+	Name						DistinguishedName
 	Sales Dept Workstations		OU=Workstations,OU=SalesDept,DC=Contoso,DC=Local
 	NW Marketing Desktops		OU=Desktops,OU=Marketing,OU=NorthWestRegion,DC=Contoso,DC=Local
 	
@@ -144,7 +167,7 @@ OS Image selection dropdown list
 	To populate the OS Images list, include a CSV file named "OSDOSImages.csv" with a "DisplayName" and "ImageName" column.
 	When using multiple images, "ImageName" must match the logic for the "Apply Operating System Image" step matching the image name in the logic
 	Example:
-	DisplayName				ImageName
+	DisplayName						ImageName
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
@@ -157,10 +180,10 @@ Applicaitons selection tab
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
 	Example:
-	DisplayName			ApplicationName			Required	Checked
-	Google Chrome			OSD - Chrome					TRUE
-	Microsoft Office 365		OSD - Microsoft Office 365	TRUE
-	Mozilla Firefox			OSD - Firefox					TRUE
+	DisplayName				ApplicationName				Required	Checked
+	Google Chrome			OSD - Chrome							TRUE
+	Microsoft Office 365	OSD - Microsoft Office 365	TRUE
+	Mozilla Firefox			OSD - Firefox							TRUE
 	
 Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
