@@ -201,7 +201,7 @@ PARAMETERS-CustomWizardTitle
 	To populate the OU selection list
 	In the script folder, include a CSV file named "OSDADOUList.csv" with a "Name" and "DistinguishedName" column
 	Example:
-	Name						DistinguishedName
+	Name									DistinguishedName
 	Sales Dept Workstations		OU=Workstations,OU=SalesDept,DC=Contoso,DC=Local
 	NW Marketing Desktops		OU=Desktops,OU=Marketing,OU=NorthWestRegion,DC=Contoso,DC=Local
 	
@@ -210,7 +210,7 @@ PARAMETERS-CustomWizardTitle
 	To populate the OS Images list, include a CSV file named "OSDOSImages.csv" with a "DisplayName" and "ImageName" column.
 	When using multiple images, "ImageName" must match the logic for the "Apply Operating System Image" step matching the image name in the logic
 	Example:
-	DisplayName						ImageName
+	DisplayName							ImageName
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
@@ -240,10 +240,10 @@ PARAMETERS-CustomWizardTitle
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
 	Example:
-	DisplayName				ApplicationName				Required	Checked
-	Google Chrome			OSD - Chrome							TRUE
-	Microsoft Office 365	OSD - Microsoft Office 365	TRUE
-	Mozilla Firefox			OSD - Firefox							TRUE
+	DisplayName				ApplicationName					Required	Checked
+	Google Chrome			OSD - Chrome										TRUE
+	Microsoft Office 365		OSD - Microsoft Office 365	TRUE
+	Mozilla Firefox				OSD - Firefox									 	TRUE
 	
 	Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
