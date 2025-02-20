@@ -1,9 +1,0 @@
-Note: Sorry for the text file change log. I'm still new at sharing my work.
-
-v1.5
-Changed parameter -DisablePrefilght to -DisableTabDeploymentReadiness and added alias -DisablePrefilght
-Added "-DisableTab_____" options to disable and remove individual tab and requirements
-Added steps so "_SMSTSPackageName" and/or "_SMSTSOrgName" can be used to populate the custom wizard title
-Added "-DebugWizard" parameter to allow script to run without invoking the Microsoft.SMS.TSEnviornment (It still attempts to load, the error is simply ignored).
-	"-DebugWizard" parameter is hidden. Use "-DebugWizard True" to invoke
-Minor bug fixes and wording corrections
