@@ -1,6 +1,3 @@
-# OSD-Wizard-UDI-Replacment
-A PowerShell OSD wizard created based on the MDT UDI Wizard functionality
-
 ## TOPIC
 ```
 	about_OSDWizard
@@ -89,6 +86,10 @@ PARAMETERS-CustomWizardTitle
 -DisableTabComputerName
 	Completely disable the Computer Name tab page and requirements
 	Accepted values: "True"
+	
+-DisableTabAdminPassword
+	Completely disable the Administrator Password tab page and requirements
+	Accepted values: "True"
 
 -DisableTabOperatingSystem
 	Completely disable the Operating System tab page and requirements
@@ -134,6 +135,7 @@ PARAMETERS-CustomWizardTitle
 	-DefaultLanguage 'EN-US'
 	-DefaultTimezone 'Pacific Standard Time'
 	-DisableTabComputerName True
+	-DisableTabAdminPassword True
 	-DisableTabOperatingSystem True
 	-DisableTabDeploymentReadiness True
 	-DisableTabLanguage True
@@ -153,6 +155,7 @@ PARAMETERS-CustomWizardTitle
 	OSDJoinAccount
 	OSDJoinPassword
 	OSDBuildAccount - Only returned if enabled and "-DisablePassword" selected
+	OSDLocalAdminPassword
 	OSDImageName - Legacy MDT variable for backward compatibility
 	OSDDiskIndex - Physical disk number to be partitioned. Previous MDT/UDI variable was "OSDTargetDrive"
 	OSDBitLockerMode - Only returns "True" if checked. Legacy MDT variable for backward compatibility
@@ -177,6 +180,8 @@ PARAMETERS-CustomWizardTitle
 	OSD wizard will only function in Windows PE unless "-DebugWizard True" is used
 	Pre-flight checks taken directly from UDI wizard checks and Microsoft website
 	https://learn.microsoft.com/en-us/archive/blogs/deploymentguys/pre-flight-checks-ac-power-check
+		
+	Local administrator user account creation (OSDAddAdmin variable) is not supported outside of the MDT and is intentionally omitted.
 ```
 
 ## FUNCTIONALITY
@@ -240,10 +245,10 @@ PARAMETERS-CustomWizardTitle
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
 	Example:
-	DisplayName		ApplicationName			Required	Checked
-	Google Chrome		OSD - Chrome					TRUE
-	Microsoft Office 365	OSD - Microsoft Office 365	TRUE
-	Mozilla Firefox		OSD - Firefox					TRUE
+	DisplayName			ApplicationName			Required	Checked
+	Google Chrome			OSD - Chrome					TRUE
+	Microsoft Office 365		OSD - Microsoft Office 365	TRUE
+	Mozilla Firefox			OSD - Firefox					TRUE
 	
 	Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
@@ -282,4 +287,19 @@ PARAMETERS-CustomWizardTitle
 	Changed "OSDBitLockerMode" return variable to only return "True" when active. When "Enable BitLocker" is unchecked, "OSDBitLockerMode" variable is not populated or returned. This is to allow compatibility with existing task sequences
 	Parameter "-DisabledBitlocker" will now lock the BitLocker check box preventing ir from being checked
 	Removed OSDWizardSuccess result when clicking the Cancel button
+
+	Version 2.1
+	Changed memory check to pass 4GB when exactly 4GB memory is used - "4294967296" changed to (4GB - 64MB)
+	Changed disk size check value - "68719476736" changed to 64GB
+	Changed log output $NewOSDComputerName to $OSDComputerName to correct issue where the "OSDComputerName" variable was not correctly output to the log.
+
+	Version 3.0
+	Added confirm password field to Computer Name tab domain join credentials
+	Added tab page to set the Local Administrator password
+	Added parameter -DisableTabAdminPassword to disable the local administrator tab page
+	Fixed BIOS serial number OSD variable. Change BIOSSerialNumber to BIOSSeralNumber
+	Added log messages to indicate OSDJoinPassword and OSDLocalAdminPassword are being set. Passwords are [REDACTED]
+	Minor wording changes and corrections
+	Visual changes - added separators on some pages
+	Added descriptive wording to wizard elements. Wording taken from the UDI wizard.
 ```
