@@ -16,7 +16,7 @@
 ## PARAMETERS
 ```
 -UDIWizardXMLFileName
-	Name of the UDI Wizard XML file
+	Name of the UDI Wizard XML answer file
 	XML configuration file must be in the script root folder
 	Accepted values: "UDIWizard_Config.xml" (where UDIWizard_Config.xml is the name of your UDI wizard XML file)
 
