@@ -277,7 +277,7 @@
 	
 -Page aspects that are recognized/used or not used 
 	Microsoft.OSDRefresh.ComputerPage
-	All fields except "Domain or Workgroup" selection options and Workgroup field
+	All fields recognized
 	
 	Microsoft.SharedPages.AdminAccountsPage
 	Local administrator password field. Administrator account username is ignored
