@@ -194,7 +194,7 @@
 	-DisableTabDeploymentReadiness True
 	-DisableTabLanguage True
 	-DisableTabApplications True
-	-DisableWizard True
+	-DebugWizard True
 ```
 
 ## OUTPUTS
