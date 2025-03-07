@@ -18,7 +18,7 @@
 ## PARAMETERS
 ```
 -UDIWizardXMLFileName
-	Name of the UDI Wizard XML answer file
+	Name of the UDI Wizard XML file
 	XML configuration file must be in the script root folder
 	Accepted values: "UDIWizard_Config.xml" (where UDIWizard_Config.xml is the name of your UDI wizard XML file)
 
@@ -126,6 +126,10 @@
 	Skips importing OSDApplications.csv file
 	Not needed if file does not exist
 	Accepted values: "True"
+	
+-SkipCSVAll
+	Skips importing all CSV files
+	Accepted values: "True"
 
 -DisableTabComputerName
 	Completely disable the Computer Name tab page and requirements
@@ -188,6 +192,7 @@
 	-SkipCSVOUList True
 	-SkipCSVOSImages True
 	-SkipCSVApplications True
+	-SkipCSVAll True
 	-DisableTabComputerName True
 	-DisableTabAdminPassword True
 	-DisableTabOperatingSystem True
@@ -278,7 +283,7 @@
 	
 -Page aspects that are recognized/used or not used 
 	Microsoft.OSDRefresh.ComputerPage
-	All fields recognized
+	All fields except "Domain or Workgroup" selection options and Workgroup field
 	
 	Microsoft.SharedPages.AdminAccountsPage
 	Local administrator password field. Administrator account username is ignored
@@ -311,6 +316,7 @@
 	OSD wizard will only function in Windows PE
 	OSD wizard will not run in a task sequence run from the Software Center due to limitations preventing PowerShell from interacting with the user
 	Use "-DebugWizard True" to allow functionality outside of Windows PE
+	Workgroup options are only available with UDI wizard XML integration
 	
 	Logging
 	Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
@@ -330,7 +336,7 @@
 	Use the list from the UDI wizard XML
 	Or, in the script folder include a CSV file named "OSDADOUList.csv" with a "Name" and "DistinguishedName" column
 	Example:
-	Name									DistinguishedName
+	Name				DistinguishedName
 	Sales Dept Workstations		OU=Workstations,OU=SalesDept,DC=Contoso,DC=Local
 	NW Marketing Desktops		OU=Desktops,OU=Marketing,OU=NorthWestRegion,DC=Contoso,DC=Local
 	
@@ -338,15 +344,15 @@
 	Use the list from the UDI wizard XML
 	Or, in the script folder include a CSV file named "OSDOSImages.csv" with a "DisplayName" and "ImageName" column.
 	When using multiple images, "ImageName" must match the logic for the "Apply Operating System Image" step matching the image name in the logic
-	Items will appear in the dropdown list in the same order as the CSV
+	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Example:
-	DisplayName							ImageName
+	DisplayName				ImageName
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
 	Language Selection page
 	Use the list from the UDI wizard XML to set the default settings and lock the fields
-	Items will appear in the dropdown list in the same order as the CSV
+	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	OSDListOfLanguages.csv taken directly from ListOfLanguages.xml MDT "Scripts" folder
 	To convert to CSV use this command
 	([xml](Get-Content "\\Some\Pathto\OSDWizardRoot\ListOfLanguages.xml")).LOCALEDATA.LOCALE | ? { $_.SNAME -eq $_.SSPECIFICCULTURE } |
@@ -362,11 +368,11 @@
 	} | Export-Csv "\\Some\Pathto\OSDWizardRoot\OSDListOfLanguages.csv" -NoTypeInformation -Force
 	
 	Use this command to generate an updated timezone list
-	Items will appear in the dropdown list in the same order as the CSV
+	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Get-TimeZone -ListAvailable | Export-Csv -NoClobber -NoTypeInformation -Path "\\Some\Pathto\OSDWizardRoot\OSDTimeZonelist.csv"
 	
 	Applicaitons selection tab
-	Items will appear in the dropdown list in the same order as the CSV
+	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Is empty by default
 	To populate the Application selection list
 	Use the list from the UDI wizard XML
@@ -376,10 +382,10 @@
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
 	Example:
-	DisplayName				ApplicationName					Required	Checked
-	Google Chrome			OSD - Chrome										TRUE
+	DisplayName			ApplicationName			Required	Checked
+	Google Chrome			OSD - Chrome					TRUE
 	Microsoft Office 365		OSD - Microsoft Office 365	TRUE
-	Mozilla Firefox				OSD - Firefox										TRUE
+	Mozilla Firefox			OSD - Firefox					TRUE
 	
 	Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
@@ -393,6 +399,11 @@
 	
 	Enable BitLocker task sequence step
 	NOTE: OSD wizard does not set Enable BitLocker step sub-settings, such as where to escrow the recovery key
+
+	Install Application task sequence step
+	NOTE: Do not use the MDT step "Convert list to two digits - Coalesced". This will cause the OSD wizard COALESCEDAPPS variable to be overwritten and the Install Application step to fail
+	Set the option to "Install applications according to a dynamic variable list
+	Set the Base variable name: to COALESCEDAPPS
 	
 	Task sequence step "Cancelled Wizard Group" logic
 	TaskSequenceVariable OSDWizardSuccess equals "False"
@@ -449,4 +460,24 @@
 	Fixed bug where password fields showed [REDACTED] on the finalization when no password was set
 	Fixed bug where Finalization page would return an error if the applications list was enabled but no apps selected
 	Changed computer name tab validation to check only if Computer Name textbox is enabled. Previous setting checked -DisableComputerNameRequirement
+
+	Version 4.0.1
+	Change disk size result math from "1073741824" to "1024MB"
+	Added code to load physical disk information when no formatted volumes are found
+
+	Version 4.1
+	Added option for Workgroup selection when using the UDI wizard XML file
+	Fixed issue with language tab page not accurately updating field validation. Added Update-NavButtons to language fields.
+	Changed OSDDomainOUName return check so it will only return if $OSDDomainOUName exists
+	Fixed bug where if multiple banner .bmp files exist, an X would appear in place of the banner. If multiple .bmp files are found, custom banner import is skipped and built-in banner is used
+	Fixed bug where if multiple icon .ico files exist, an X would appear in place of the icon. If multiple .ico files are found, custom icon import is skipped and built-in icon is used
+	Fixed bug where applications list may be returned empty if $AllApps does not exist or is empty
+
+	Version 4.1.1
+	Added parameter "-SkipCSVAll" to allow skipping all CSV imports
+	Changed return variable logic to return variable if the field has text. Previous behavior was to return only if field was enabled or variable was set
+
+	Version 4.1.2
+	Fixed bug where laptops incorrectly failed the preflight AC power check. AC preflight check now only runs if Win32_Battery WMI object exists
+	Updated help Task Sequence functionality and Configurations section to include instructions for the Install Application task sequence step
 ```
