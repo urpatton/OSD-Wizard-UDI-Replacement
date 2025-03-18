@@ -54,8 +54,7 @@
 
 -DomainName
 	Sets the "OSDDomainName" variable.
-	If set the Domain Name text box will be locked and field populated
-	Accepted values: Any String
+	Accepted values: Any string or multiple comma-separated values
 
 -DisableDomainName
 	Disables the domain name text box without setting -DomainName
@@ -179,6 +178,7 @@
 	-SerializeName True
 	-NamePrefix 'NamePrefix'
 	-DomainName 'DomainName'
+	-DomainName 'DomainName01','DomainName02'
 	-DisableDomainName True
 	-DisableOUSelection True
 	-DisableUserName True
@@ -255,6 +255,7 @@
 ## UDI WIZARD XML INTEGRATED FUNCTIONALITY
 ```
 	NOTE: Parameter input will take precedence over UDI wizard settings
+	When the OU list CSV file is used, the OU selection will not be updated when multiple domains are used in the UDI XML
 	
 -Required Files
 	UDIWizard_Config.xml - UDI wizard XML configuration file must exist in the script root folder (Located in the MDT "Scripts" folder) or your custom UDI wizard .xml file
@@ -286,8 +287,9 @@
 	All fields except "Domain or Workgroup" selection options and Workgroup field
 	
 	Microsoft.SharedPages.AdminAccountsPage
-	Local administrator password field. Administrator account username is ignored
-	Local administrator user account creation (OSDAddAdmin variable) is not supported outside of the MDT and is intentionally omitted.
+	Local administrator password field
+	Administrator account username is ignored
+	Local administrator user account creation (OSDAddAdmin variable) is not supported outside of the MDT and is intentionally omitted
 	
 	Microsoft.OSDRefresh.VolumePage
 	Minimum Volume Size ignored
@@ -316,7 +318,8 @@
 	OSD wizard will only function in Windows PE
 	OSD wizard will not run in a task sequence run from the Software Center due to limitations preventing PowerShell from interacting with the user
 	Use "-DebugWizard True" to allow functionality outside of Windows PE
-	Workgroup options are only available with UDI wizard XML integration
+	Domain and Workgroup radio buttons are disabled unless the UDI XML is used
+	Workgroup options are only available with UDI wizard XML integration	
 	
 	Logging
 	Creates an "OSD_Wizard.log" file in the "_SMSTSLogPath" directory
@@ -336,7 +339,7 @@
 	Use the list from the UDI wizard XML
 	Or, in the script folder include a CSV file named "OSDADOUList.csv" with a "Name" and "DistinguishedName" column
 	Example:
-	Name				DistinguishedName
+	Name									DistinguishedName
 	Sales Dept Workstations		OU=Workstations,OU=SalesDept,DC=Contoso,DC=Local
 	NW Marketing Desktops		OU=Desktops,OU=Marketing,OU=NorthWestRegion,DC=Contoso,DC=Local
 	
@@ -346,7 +349,7 @@
 	When using multiple images, "ImageName" must match the logic for the "Apply Operating System Image" step matching the image name in the logic
 	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Example:
-	DisplayName				ImageName
+	DisplayName							ImageName
 	Windows 11 Enterprise 24H2		Windows 11 Enterprise 24H2 Base OS
 	Windows 11 Enterprise 23H2		Windows 11 Enterprise 23H2 Base OS
 	
@@ -371,21 +374,21 @@
 	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Get-TimeZone -ListAvailable | Export-Csv -NoClobber -NoTypeInformation -Path "\\Some\Pathto\OSDWizardRoot\OSDTimeZonelist.csv"
 	
-	Applicaitons selection tab
+	Applications selection tab
 	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Is empty by default
 	To populate the Application selection list
 	Use the list from the UDI wizard XML
 	Or, in the script folder include a CSV file named "OSDApplications.csv" with the columns "DisplayName", "ApplicationName", "Required", and "Checked" columns
 	Output creates "COALESCEDAPPS" variable for dynamic application installtion
-	"ApplicationName" column is the applicaiton name of the app to be installed dynamically using
+	"ApplicationName" column is the application name of the app to be installed dynamically using
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
 	Example:
-	DisplayName			ApplicationName			Required	Checked
-	Google Chrome			OSD - Chrome					TRUE
+	DisplayName				ApplicationName					Required	Checked
+	Google Chrome			OSD - Chrome										TRUE
 	Microsoft Office 365		OSD - Microsoft Office 365	TRUE
-	Mozilla Firefox			OSD - Firefox					TRUE
+	Mozilla Firefox				OSD - Firefox										TRUE
 	
 	Task Sequence functionality and Configurations
 	To run OSD Wizard, set task sequence step as "Run PowerShell Script" with execution policy in Bypass
@@ -402,8 +405,8 @@
 
 	Install Application task sequence step
 	NOTE: Do not use the MDT step "Convert list to two digits - Coalesced". This will cause the OSD wizard COALESCEDAPPS variable to be overwritten and the Install Application step to fail
-	Set the option to "Install applications according to a dynamic variable list
-	Set the Base variable name: to COALESCEDAPPS
+	Set the option to "Install applications according to a dynamic variable list"
+	Set the Base variable name to COALESCEDAPPS
 	
 	Task sequence step "Cancelled Wizard Group" logic
 	TaskSequenceVariable OSDWizardSuccess equals "False"
@@ -480,4 +483,11 @@
 	Version 4.1.2
 	Fixed bug where laptops incorrectly failed the preflight AC power check. AC preflight check now only runs if Win32_Battery WMI object exists
 	Updated help Task Sequence functionality and Configurations section to include instructions for the Install Application task sequence step
+
+	Version 4.2
+	Added support for multiple domain selection
+	Parameter "-DomainName" will now accept multiple comma-separated values
+	Parameter "-DomainName" will no longer lock the domain name field. Use "-DisableDomainName" to lock the domain name combobox
+	Domain and Workgroup radio buttons are disabled unless the UDI XML is used
+	Fixed UDI XML applications list so that locked applications can no longer be checked/unchecked
 ```
