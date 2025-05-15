@@ -227,6 +227,7 @@
 	UserLocale - Legacy MDT language variable for backward compatibility
 	KeyboardLocale - Legacy MDT language variable for backward compatibility
 	CoalescedApps - Only returned if applications enabled
+	CoalescedPacks - Only returns if package/programs are used as applications
 	Make - Device Manufacturer. Added to compensate for missing BDD.log
 	Model - Device Model. Added to compensate for missing BDD.log
 	SerialNumber - Device serial number. Added to compensate for missing BDD.log
@@ -308,9 +309,10 @@
 	Bug: Keyboard default language selection will be ignored if the XML keyboard local number (00000404) cannot be matched to a single existing language
 	
 	Microsoft.OSDRefresh.ApplicationPage
-	Only Applications are recognized. Package/Programs are not recognized. (Possible support in a future version)
-	Application groups are not recognized
-	Application property mappings are ignored
+	Applications and Package/Programs are both recognized
+	Unique Application, Package, and Display Names must be used in the UDI XML
+	Groups are not recognized
+	Property mappings are ignored
 ```
 
 ## GENERAL FUNCTIONALITY
@@ -375,12 +377,14 @@
 	Get-TimeZone -ListAvailable | Export-Csv -NoClobber -NoTypeInformation -Path "\\Some\Pathto\OSDWizardRoot\OSDTimeZonelist.csv"
 	
 	Applications selection tab
+	Package/Program installations are only recognized when using the UDI XML for the applications list
+	NOTE: Different packages for x86 and x64 are not supported. If both are used, it will default to the "amd64" package in the UDI XML
 	Items will appear in the dropdown list in the same order as the CSV or UDI XML
 	Is empty by default
 	To populate the Application selection list
 	Use the list from the UDI wizard XML
 	Or, in the script folder include a CSV file named "OSDApplications.csv" with the columns "DisplayName", "ApplicationName", "Required", and "Checked" columns
-	Output creates "COALESCEDAPPS" variable for dynamic application installtion
+	Output creates "COALESCEDAPPS" variable for dynamic application and "COALESCEDPACKS" for package installation
 	"ApplicationName" column is the application name of the app to be installed dynamically using
 	"Required" column set to "True" will check all apps that are required installs. The apps can be unchecked, but will be rechecked when clicking "Next"
 	"Checked" column set to "True" will check all apps that are default apps but are optional installs the user may uncheck
@@ -407,6 +411,11 @@
 	NOTE: Do not use the MDT step "Convert list to two digits - Coalesced". This will cause the OSD wizard COALESCEDAPPS variable to be overwritten and the Install Application step to fail
 	Set the option to "Install applications according to a dynamic variable list"
 	Set the Base variable name to COALESCEDAPPS
+
+	Install Packages task sequence step
+	NOTE: Do not use the MDT step "Convert list to two digits - Coalesced". This will cause the OSD wizard COALESCEDPACKS variable to be overwritten and the Install Packages step to fail
+	Set the option to "Install packages according to a dynamic variable list"
+	Set the Base variable name to COALESCEDPACKS
 	
 	Task sequence step "Cancelled Wizard Group" logic
 	TaskSequenceVariable OSDWizardSuccess equals "False"
@@ -490,4 +499,8 @@
 	Parameter "-DomainName" will no longer lock the domain name field. Use "-DisableDomainName" to lock the domain name combobox
 	Domain and Workgroup radio buttons are disabled unless the UDI XML is used
 	Fixed UDI XML applications list so that locked applications can no longer be checked/unchecked
+
+	Version 4.5
+	Added support for package/program application installs
+	Timezone and language CSV files will no longer load if Language tab is disabled
 ```
